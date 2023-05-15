@@ -21,6 +21,7 @@
 #include <ProcessConstants.au3>
 #include <String.au3>
 #include <WinAPIError.au3>
+#include <Misc.au3>
 
 #NoTrayIcon
 #RequireAdmin
@@ -29,6 +30,12 @@ Opt ("GUIOnEventMode", 1)
 Opt ("TrayAutoPause", 0)
 Opt ("TrayMenuMode", 11)
 Opt ("TrayOnEventMode", 1)
+
+; Run only one instance
+If _Singleton("Portable-VirtualBox", 1) = 0 Then
+  MsgBox($MB_SYSTEMMODAL, "Warning", "Program is already running")
+  Exit
+EndIf
 
 TraySetClick (16)
 TraySetState ()
@@ -647,6 +654,13 @@ EndIf
       Else
         Local $DRV = 0
       EndIf
+      
+      If RegRead ("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VBoxSup", "DisplayName") <> "VirtualBox Service" Then
+        RunWait ("cmd /c sc create VBoxSup binpath= ""%CD%\"& $arch &"\drivers\VBoxSup\VBoxSup.sys"" type= kernel start= auto error= normal displayname= PortableVBoxSup", @ScriptDir, @SW_HIDE)
+        Local $SUP = 1
+      Else
+        Local $SUP = 0
+      EndIf
 
       If IniRead ($var1, "usb", "key", "NotFound") = 1 Then
         If RegRead ("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VBoxUSB", "DisplayName") <> "VirtualBox USB" Then
@@ -712,6 +726,10 @@ EndIf
 
       If $DRV = 1 Then
         RunWait ("sc start VBoxDRV", @ScriptDir, @SW_HIDE)
+      EndIf
+      
+      If $SUP = 1 Then
+        RunWait ("sc start VBoxSup", @ScriptDir, @SW_HIDE)
       EndIf
 
       If $USB = 1 Then
@@ -786,6 +804,10 @@ EndIf
         RunWait ("sc stop VBoxDRV", @ScriptDir, @SW_HIDE)
       EndIf
 
+      If $SUP = 1 Then
+        RunWait ("sc stop VBoxSup", @ScriptDir, @SW_HIDE)
+      EndIf
+
       If $USB = 1 Then
         RunWait ("sc stop VBoxUSB", @ScriptDir, @SW_HIDE)
         If @OSArch = "x86" Then
@@ -848,6 +870,10 @@ EndIf
         RunWait ("sc delete VBoxDRV", @ScriptDir, @SW_HIDE)
       EndIf
 
+      If $SUP = 1 Then
+        RunWait ("sc delete VBoxSup", @ScriptDir, @SW_HIDE)
+      EndIf
+      
       If $USB = 1 Then
         RunWait ("sc delete VBoxUSB", @ScriptDir, @SW_HIDE)
       EndIf
