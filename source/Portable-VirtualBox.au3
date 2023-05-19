@@ -33,7 +33,7 @@ Opt ("TrayOnEventMode", 1)
 
 ; Run only one instance
 If _Singleton("Portable-VirtualBox", 1) = 0 Then
-  MsgBox($MB_SYSTEMMODAL, "Warning", "Program is already running")
+  MsgBox($MB_SYSTEMMODAL, "Warning", "VirtualBox is already running!")
   Exit
 EndIf
 
@@ -49,6 +49,7 @@ Global $pwd = @ScriptDir
 Global $updateUrl = IniRead (@ScriptDir&"\data\settings\vboxinstall.ini", "download", "update", "NotFound")
 
 Global $new1 = 0, $new2 = 0
+Global $isSettingsWindowVisible = false;
 
 If FileExists (@ScriptDir&"\update.exe") Then
   Sleep (2000)
@@ -899,6 +900,12 @@ Func HideWindows ()
 EndFunc
 
 Func Settings ()
+  $isSettingsWindowVisible = Not $isSettingsWindowVisible; // Toggle window
+  If $isSettingsWindowVisible = False Then
+    ExitGUI()
+    Return
+  EndIf
+
   Opt ("GUIOnEventMode", 1)
 
   Global $Radio1, $Radio2, $Radio3, $Radio4, $Radio5, $Radio6, $Radio7, $Radio8, $Radio9, $Radio10, $Radio11, $Radio12, $Radio13, $Radio14
