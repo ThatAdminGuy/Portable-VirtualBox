@@ -1,10 +1,17 @@
-Portable-VirtualBox
-===================
+# About Portable-VirtualBox
 
 Portable-VirtualBox is a free and open source software tool that lets you run any operating system from a USB stick without separate installation.
 
-More info is available at http://www.vbox.me/
+Initially the tool was developed and maintained by Runar Buvik. Check out his site at http://www.vbox.me/.
 
-### Building ###
+This repository is a fork for trying to keep the tool running as good as I can.
 
-Please see here for information on how to build from source: [BUILDING](BUILDING.md).
+# Motivation
+
+# Building
+
+Simply clone this project and convert the code with `Aut2exe_x64.exe` or `Aut2exe.exe`. You can choose any other icon, if you want. 
+
+# Running
+
+At first start the generated executable.
