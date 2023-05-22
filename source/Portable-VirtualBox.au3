@@ -57,7 +57,7 @@ If FileExists (@ScriptDir&"\update.exe") Then
   FileDelete (@ScriptDir&"\update.exe")
 EndIf
 
-If NOT FileExists ($var1) Then
+If Not FileExists ($var1) Then
   DirCreate (@ScriptDir&"\data\settings")
   IniWrite ($var1, "hotkeys", "key", "1")
   IniWrite ($var1, "hotkeys", "userkey", "0")
@@ -730,38 +730,26 @@ If (FileExists (@ScriptDir&"\app32\virtualbox.exe") OR FileExists (@ScriptDir&"\
       If $NET = 1 Then
         RunWait ("sc start VBoxNetFlt", @ScriptDir, @SW_HIDE)
       EndIf
-
-      If $CmdLine[0] = 1 Then
-        If FileExists (@ScriptDir&"\data\.VirtualBox") Then
-          Local $UserHome = IniRead ($var1, "userhome", "key", "NotFound")
-          Local $StartVM  = $CmdLine[1]
-          If IniRead ($var1, "userhome", "key", "NotFound") = "%CD%\data\.VirtualBox" AND FileExists (@ScriptDir&"\data\.VirtualBox\HardDisks\"&$CmdLine[1]&".vdi") Then
-            RunWait ("cmd /c set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VBoxManage.exe startvm """& $StartVM &"""" , @ScriptDir, @SW_HIDE)
-          Else
-            RunWait ("cmd /c set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VirtualBox.exe", @ScriptDir, @SW_HIDE)
-          EndIf
-        Else
-          RunWait ("cmd /c set VBOX_USER_HOME=%CD%\data\.VirtualBox & .\"& $arch &"\VirtualBox.exe", @ScriptDir, @SW_HIDE)
-        EndIf
-
-        ProcessWaitClose ("VirtualBox.exe")
-        ProcessWaitClose ("VBoxManage.exe")
-      Else
-        If FileExists (@ScriptDir&"\data\.VirtualBox") Then
-          Local $UserHome = IniRead ($var1, "userhome", "key", "NotFound")
-          Local $StartVM  = IniRead ($var1, "startvm", "key", "NotFound")
-          If IniRead ($var1, "startvm", "key", "NotFound") = true Then
-            RunWait ("cmd /C set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VBoxManage.exe startvm """& $StartVM &"""" , @ScriptDir, @SW_HIDE)
-          Else
-            RunWait ("cmd /c set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VirtualBox.exe", @ScriptDir, @SW_HIDE)
-          EndIf
-        Else
-          RunWait ("cmd /c set VBOX_USER_HOME=%CD%\data\.VirtualBox & .\"& $arch &"\VirtualBox.exe", @ScriptDir, @SW_HIDE)
-        EndIf
-
-        ProcessWaitClose ("VirtualBox.exe")
-        ProcessWaitClose ("VBoxManage.exe")
+                        
+      If Not FileExists (@ScriptDir&"\data\.VirtualBox") Then
+        DirCreate (@ScriptDir&"\data\.VirtualBox\")
       EndIf
+
+      Local $UserHome = IniRead ($var1, "userhome", "key", "NotFound")
+      If $CmdLine[0] = 1 And IniRead ($var1, "userhome", "key", "NotFound") = "%CD%\data\.VirtualBox" AND FileExists (@ScriptDir&"\data\.VirtualBox\HardDisks\"&$CmdLine[1]&".vdi") Then    
+        Local $StartVM  = $CmdLine[1]      
+        RunWait ("cmd /c set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VBoxManage.exe startvm """& $StartVM &"""" , @ScriptDir, @SW_HIDE) 
+      ElseIf $CmdLine[0] = 0 And IniRead ($var1, "startvm", "key", "NotFound") <> "" Then
+        Local $StartVM  = IniRead ($var1, "startvm", "key", "NotFound")
+        RunWait ("cmd /C set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VBoxManage.exe startvm """& $StartVM &"""" , @ScriptDir, @SW_HIDE)   
+      Else
+        RunWait ("cmd /c set VBOX_USER_HOME="& $UserHome &"& .\"& $arch &"\VirtualBox.exe", @ScriptDir, @SW_HIDE)         
+      EndIf       
+      
+      ProcessWaitClose ("VirtualBox.exe")
+      ProcessWaitClose ("VBoxManage.exe") ; probably no longer used
+      ProcessWaitClose ("VirtualBoxVM.exe")
+      ProcessWaitClose ("VBoxHeadless.exe")
 
       SplashTextOn ("Portable-VirtualBox", IniRead ($var2 & $lng &".ini", "messages", "07", "NotFound"), 220, 40, -1, -1, 1, "arial", 12)
 
